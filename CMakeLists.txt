@@ -10,7 +10,7 @@ find_package( Threads REQUIRED )
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
 
 option( USE_SYSTEM_TZ_DB "Use the operating system's timezone database" OFF )
-option( USE_TZ_DB_IN_DOT "Save the timezone database in the current folder" OFF )
+option( USE_TZ_DB_IN_DOT "Save the timezone database in the current folder" ON )
 option( BUILD_SHARED_LIBS  "Build a shared version of library" OFF )
 option( ENABLE_DATE_TESTING "Enable unit tests" ON )
 option( DISABLE_STRING_VIEW "Disable string view" OFF )
@@ -47,24 +47,8 @@ set( HEADER_FILES
 
 add_library( tz ${HEADER_FILES} ${SOURCE_FOLDER}/tz.cpp )
 
-if( USE_SYSTEM_TZ_DB )
-	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=0 )
-	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=0 )
-	# cannot set USE_OS_TZDB to 1 on Windows
-	if( NOT WIN32 )
-		target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=1 )
-	endif( )
-else( )
-	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=1 )
-	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=1 )
-	target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=0 )
-	find_package( CURL REQUIRED )
-	include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
-	set( OPTIONAL_LIBRARIES ${CURL_LIBRARIES} )
-endif( )
-
 if( USE_TZ_DB_IN_DOT )
-	target_compile_definitions( tz PRIVATE -DINSTALL=. )
+	target_compile_definitions( tz PRIVATE -DINSTALL=./timezone/ )
 endif( )
 
 if( DISABLE_STRING_VIEW )
